@@ -1,0 +1,185 @@
+---
+title: "Lab 7 - Comparaciones pareadas"
+author: "Diego Martinez"
+date: "2024-10-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Laboratorio 7: Comparaciones pareadas
+
+### Lecturas recomendadas
+
+-   Capítulo 6.2 - Johnson, Richard A.; Wichern, Dean W. (2007). Applied Multivariate Statistical Analysis. Pearson Education. [https://www.webpages.uidaho.edu/book-link.pdf](https://www.webpages.uidaho.edu/~stevel/519/Applied%20Multivariate%20Statistical%20Analysis%20by%20Johnson%20and%20Wichern.pdf){.uri}
+
+## Mediciones pareadas
+
+En un caso particular de la comparación de medias entre dos grupos de condiciones experimentales es posible aplicar uno o más tratamientos a la misma unidad experimental. De esta forma es posible comparar, por ejemplo, el efecto antes y después de la aplicación de un tratamiento (como puede ser la administración de un medicamento o la exposición a una condición experimental específica). Este tipo de comparaciones se conocen como comparaciones pareades, donde la variable de respuesta usualmente se estima como una diferencia entre las p posibles variables medidas en cada unidad experimental. En el caso de una solo variable, la diferencia entre las dos condiciones experimentales o “tratamientos” para n unidades experimentales se define cómo:
+
+$$
+D_j = X_{j1} - X_{j2}, \ con \ j = 1, 2, ..., n
+$$
+
+Dado que $D_j$ corresponde a observaciones diferentes de una distribución normal, se puede considerar la variable:
+
+$$
+t = \frac{\bar{D}-\delta}{s_d / \sqrt{n}}
+$$
+
+Con una distribución $t$ con $n-1$ grados de libertad.
+
+De esta manera es posible plantear una hipótesis de la diferencia entre las medias de ambos tratamientos:
+
+$$
+H_0: \delta = 0 \\
+H_1: \delta \neq 0
+$$
+
+Por la cual se puede concluir comparando $|t|$ con $t_{n-1}(\frac{\alpha}{2})$. Un intervalo de confianza del $100(1-\alpha)\%$ para la media de la diferencia es:
+
+$$
+\bar{d} - t_{n-1}\left(\frac{\alpha}{2}\right)\frac{s_d}{\sqrt{n}} \leq \delta \leq \bar{d} + _{n-1}\left(\frac{\alpha}{2}\right)\frac{s_d}{\sqrt{n}}
+$$
+
+Este mismo caso se puede extender a más de una variable de respuesta o $p$ variables:
+
+$$
+D_{j,k} = X_{j,1}^k - X_{j,2}^2, con \ j = 1, 2, ..., n \ y\ k = 1, 2, ..., p
+$$
+
+Cuya inferencia sobre la diferencia entre las medias se realiza mediante el estadístico T\^2 y su comparación con su respectivo $T crítico$:
+
+$$
+T^2 = n(\bar{D} - \delta)'(S_d)^{-1}(\bar{D} - \delta) > \frac{p(n-1)}{(n-p)}F_{p,n-p(\alpha)}
+$$
+
+## Medidas repetidas para la comparación de tratamientos
+
+Además de la comparación entre 2 tratamientos, también es posible realizar la comparación de más de 2 tratamientos cuando se aplican a la misma unidad experimental, lo cual se conoce como “medidas repetidas”. Para el caso de una sola variable, se tiene que $X_{ji}$ es la respuesta del tratamiento $i$, la unidad $j$ y $\textbf{C}$ es una matriz de contraste específica, la cual implica que:
+
+$$
+\left[\begin{matrix}\mu_1-\mu_2\\\mu_1-\mu_3\\\vdots\\\mu_1-\mu_q\\\end{matrix}\right]=\left[\begin{matrix}1&-1&0&\cdots&0\\1&0&-1&\ldots&0\\\vdots&\vdots&\ldots&\ddots&\vdots\\1&0&0&\cdots&-1\\\end{matrix}\right]\left[\begin{matrix}\mu_1\\\mu_2\\\vdots\\\mu_q\\\end{matrix}\right]=C\mu
+$$
+
+Donde cada columna es un vector de contraste $\mathbf{c}$. Si las medias de tratamientos son iguales, $C\mu=0$. De esta forma, basado en los contrastes $Cx_j$, tenemos medias $C\bar{x}$ y una matriz de covarianza $CSC^\prime$, y se comprueba si $C\mu=0$ teniendo en cuenta el criterio:
+
+$$
+T^2=n\left(C\bar{x}\right)^\prime\left(CSC^\prime\right)^{-1}C\bar{x}>\frac{\left(n-1\right)\left(q-1\right)}{\left(n-q+1\right)}F_{q-1,n-q+1,(\alpha)}
+$$
+
+Para conocer el efecto de cada uno de los contrastes planteados $c^\prime\mu$ en la matriz de contrastes, se pueden construir intervalos simultáneos del $100\left(1-\alpha\right)\%$ de confianza para cualquier vector de contraste de interés:
+
+$$
+c^\prime \mu = c^\prime\bar{x}\pm\sqrt{\frac{(n-1)(q-1)}{(n-q+1)}F_{q-1,n-q+1,\alpha}}\sqrt{\frac{c^\prime Sc}{n}}
+$$
+
+## Ejercicios
+
+Para este laboratorio necesitará tener instaladas las siguientes librerías:
+
+```{r, warning=FALSE, results='hide'}
+library("readxl")
+library(dplyr)
+library(rstatix)
+```
+
+### Parte 1: Comparación de medias con medidas pareadas
+
+En un estudio de 2006 se quería evaluar la variación de la frecuencia cardíaca en personas que se han ejercitado durante 10 años. Para esto se registró la frecuencia cardíaca (en latidos por minuto) antes de realizar una sesión de 10 a 15 minutos en la trotadora y 5 minutos después de su uso:
+
+| ID  | Baseline | After 5 mins |
+|:---:|:--------:|:------------:|
+|  1  |    85    |     103      |
+|  2  |    77    |      92      |
+|  3  |    81    |      97      |
+|  4  |    81    |      96      |
+|  5  |   74.5   |      93      |
+|  6  |  83.75   |      96      |
+|  7  |   76.5   |      93      |
+|  8  |  77.75   |      94      |
+|  9  |  79.25   |      90      |
+| 10  |  84.25   |      99      |
+
+Teniendo en cuenta los datos (Hoja1 del archivo “Datos.xlsx”), responda:
+
+1.  ¿Existe una diferencia significativa en la frecuencia cardíaca después de realizar las sesiones de ejercicio? Obtenga el estadístico de prueba y compare contra el valor crítico con un nivel de significancia del 5%.
+
+```{r}
+
+```
+
+2.  Obtenga un intervalo de confianza del 95% para la media de la diferencia en la frecuencia cardíaca.
+
+```{r}
+
+```
+
+3.  Este tipo de pruebas pareadas de una variable también se puede implementar usando la función `t.test()` de R. Compare los resultados obtenidos anteriormente con los resultados de la función.
+
+```{r}
+
+```
+
+### Parte 2: Comparación de medias con medidas repetidas
+
+En el mismo estudio se recopilaron datos registrados hace 10 años (1996) para los mismos sujetos, con el fin de determinar posibles variaciones de las capacidades físicas de los sujetos luego de sus 10 años de entrenamiento:
+
+| Col1 | Baseline | After 5 mins |
+|:----:|:--------:|:------------:|
+|  1   |    84    |      87      |
+|  2   |    87    |      92      |
+|  3   |    90    |      93      |
+|  4   |    94    |      98      |
+|  5   |    98    |     100      |
+|  6   |    86    |      92      |
+|  7   |    88    |      93      |
+|  8   |    84    |      90      |
+|  9   |    86    |      92      |
+|  10  |    98    |     104      |
+
+Teniendo en cuenta los nuevos datos (Hoja2 del archivo “Datos.xlsx”), responda:
+
+1.  Considere que quiere analizar posibles diferencias de la frecuencia cardíaca para:
+
+-   Antes y después de la sesión de ejercicio
+-   El año 2006 y el año 1996
+-   La interacción entre la variación por la sesión de ejercicio y el año del registro.
+
+Según esto, ¿cuál sería su matriz de contrastes?
+
+```{r}
+
+```
+
+2.  ¿Existe un efecto significativo de los tratamientos en la frecuencia cardíaca de las participantes del estudio? Obtenga el estadístico de prueba y compare contra el valor crítico con un nivel de significancia del 5%.
+
+```{r}
+
+```
+
+3.  Obtenga un intervalo de confianza del 95% para cada uno de los contrastes planteados para concluir su efecto en la aceptación o el rechazo de la hipótesis nula.
+
+```{r}
+
+```
+
+4.  En R también existen funciones que permiten implementar el análisis de medidas repetidas, aunque suelen utilizar estadísticos diferentes a la prueba de hotelling. Una de estas pruebas es la ANOVA de una vía de medidas repetidas o “Within-subjects ANOVA”. Para implementar esta prueba utilice el siguiente código:
+
+``` r
+data_aov <- data %>% 
+  gather(key = "time", value = "bpm", Baseline, After_5_mins) %>% 
+  convert_as_factor(ID, time) 
+res.aov <- anova_test(data = data_aov, dv = bpm, wid = ID, within = c(time,Year)) 
+get_anova_table(res.aov)
+```
+
+Compare sus resultados con los obtenidos en el punto 3. ¿Obtuvieron resultados similares para cada tratamiento?
+
+```{r}
+
+```
